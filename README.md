@@ -25,6 +25,21 @@ Then:
 ### Distributing connections
 The incoming connections are distributed by hashing the ip and port. An ip and port will always get the same server handling its connection.
 
+## Build & Install
+Godist is exceptionally easy to build and install. Just clone the repo and execute one of the following commands.
+
+    $ go build
+
+Will get you a ./**godist** binary.
+
+    $ go install
+
+Installs the **godist** binary to your *GOPATH*/bin.
+
+    $ go run main.go
+
+Useful during debug.
+
 ## Contributing
 
 Pull requests, issues, and comments are greatly appreciated.
