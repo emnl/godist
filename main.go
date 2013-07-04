@@ -1,7 +1,6 @@
 package main
 
 import (
-	"bytes"
 	"encoding/json"
 	"flag"
 	"fmt"
@@ -109,32 +108,25 @@ func passBytes(from, to net.Conn, finish chan bool) {
 	defer func() { finish <- true }()
 
 	for {
-		buf := new(bytes.Buffer)
-		for {
-			data := make([]byte, BUFFER_SIZE)
-			n, err := from.Read(data)
-			if err != nil {
-				if *verbose {
-					log.Println(from.RemoteAddr().String() + " closed connection with " + to.RemoteAddr().String() + " — " + err.Error())
-				}
-				return
+		data := make([]byte, BUFFER_SIZE)
+
+		n, err := from.Read(data)
+		if err != nil {
+			if *verbose {
+				log.Println(from.RemoteAddr().String() + " closed connection with " + to.RemoteAddr().String() + " — " + err.Error())
 			}
+			return
+		}
 
-			buf.Write(data[:n])
-			if data[len(data)-1] == 0 {
-				if _, err := to.Write(buf.Bytes()); err != nil {
-					if *verbose {
-						log.Println(to.RemoteAddr().String() + " closed connection with " + from.RemoteAddr().String() + " — " + err.Error())
-					}
-					return
-				}
-
-				if *verbose {
-					log.Printf("%v bytes sent from "+from.RemoteAddr().String()+" to "+to.RemoteAddr().String()+"\n", len(buf.Bytes()))
-				}
-
-				break
+		if _, err := to.Write(data[:n]); err != nil {
+			if *verbose {
+				log.Println(to.RemoteAddr().String() + " closed connection with " + from.RemoteAddr().String() + " — " + err.Error())
 			}
+			return
+		}
+
+		if *verbose {
+			log.Printf("%v bytes sent from "+from.RemoteAddr().String()+" to "+to.RemoteAddr().String()+"\n", n)
 		}
 	}
 
