@@ -12,7 +12,7 @@ Godist requires a configuration file to setup the most basic settings. The softw
 
     {
 		"Host": "localhost:8080",
-		"Sockets": 
+		"Servers":
 			["localhost:4000", 
 			 "localhost:4001",
 			 "localhost:4002"]
