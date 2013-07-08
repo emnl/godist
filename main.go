@@ -17,9 +17,9 @@ const (
 	BUFFER_SIZE = 2048
 )
 
-type Config struct {
-	Host    string
-	Servers []string
+type config struct {
+	host    string
+	servers []string
 }
 
 var verbose = flag.Bool("v", false, "verbose output")
@@ -38,11 +38,11 @@ func main() {
 		flag.Usage()
 	}
 
-	var config *Config
+	var conf *config
 	if flag.NArg() == 1 {
-		config = readConfigFile(flag.Arg(0))
+		conf = readConfigFile(flag.Arg(0))
 	} else if flag.NArg() == 0 {
-		config = readConfigFile("godist.conf")
+		conf = readConfigFile("godist.conf")
 	} else {
 		flag.Usage()
 	}
@@ -50,16 +50,16 @@ func main() {
 	nCPU := runtime.NumCPU()
 	runtime.GOMAXPROCS(nCPU)
 
-	proxyServer(config)
+	proxyServer(conf)
 }
 
-func proxyServer(config *Config) {
-	listener, err := net.Listen("tcp", config.Host)
+func proxyServer(conf *config) {
+	listener, err := net.Listen("tcp", conf.host)
 	if err != nil {
 		log.Fatalln(err.Error())
 	}
 
-	log.Println("Starting godist on " + config.Host)
+	log.Println("Starting godist on " + conf.host)
 
 	for {
 		conn, err := listener.Accept()
@@ -67,7 +67,7 @@ func proxyServer(config *Config) {
 			log.Fatalln(err.Error())
 		}
 
-		assignedServer := serverFromString(config, conn.RemoteAddr().String())
+		assignedServer := serverFromString(conf, conn.RemoteAddr().String())
 		go proxyConn(conn, assignedServer)
 	}
 }
@@ -132,10 +132,10 @@ func passBytes(from, to net.Conn, finish chan bool) {
 
 }
 
-func serverFromString(config *Config, str string) string {
-	index := int(math.Floor(math.Mod(float64(hash(str)), float64(len(config.Servers)))))
+func serverFromString(conf *config, str string) string {
+	index := int(math.Floor(math.Mod(float64(hash(str)), float64(len(conf.servers)))))
 
-	return config.Servers[index]
+	return conf.servers[index]
 }
 
 func hash(s string) int {
@@ -145,19 +145,19 @@ func hash(s string) int {
 	return int(h.Sum32())
 }
 
-func readConfigFile(file string) *Config {
+func readConfigFile(file string) *config {
 	data, err := ioutil.ReadFile(file)
 	if err != nil {
 		fatal(err.Error())
 	}
 
-	var config Config
-	err = json.Unmarshal(data, &config)
+	var conf config
+	err = json.Unmarshal(data, &conf)
 	if err != nil {
 		fatal(err.Error())
 	}
 
-	return &config
+	return &conf
 }
 
 func fatal(msg string) {
