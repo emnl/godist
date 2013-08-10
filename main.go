@@ -18,8 +18,8 @@ const (
 )
 
 type config struct {
-	host    string
-	servers []string
+	Host    string
+	Servers []string
 }
 
 var verbose = flag.Bool("v", false, "verbose output")
@@ -54,12 +54,12 @@ func main() {
 }
 
 func proxyServer(conf *config) {
-	listener, err := net.Listen("tcp", conf.host)
+	listener, err := net.Listen("tcp", conf.Host)
 	if err != nil {
 		log.Fatalln(err.Error())
 	}
 
-	log.Println("Starting godist on " + conf.host)
+	log.Println("Starting godist on " + conf.Host)
 
 	for {
 		conn, err := listener.Accept()
@@ -133,9 +133,9 @@ func passBytes(from, to net.Conn, finish chan bool) {
 }
 
 func serverFromString(conf *config, str string) string {
-	index := int(math.Floor(math.Mod(float64(hash(str)), float64(len(conf.servers)))))
+	index := int(math.Floor(math.Mod(float64(hash(str)), float64(len(conf.Servers)))))
 
-	return conf.servers[index]
+	return conf.Servers[index]
 }
 
 func hash(s string) int {
@@ -155,6 +155,10 @@ func readConfigFile(file string) *config {
 	err = json.Unmarshal(data, &conf)
 	if err != nil {
 		fatal(err.Error())
+	}
+
+	if conf.Host == "" || conf.Servers == nil {
+		fatal("Invalid configuration")
 	}
 
 	return &conf
