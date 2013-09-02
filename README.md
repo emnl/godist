@@ -9,6 +9,26 @@ Godist distributes your incoming tcp connections between servers, balancing the 
 
 Written in Go. Built for concurrency.
 
+## Architecture
+
+Godist spawn **1** new Goroutine for each incomming connection, the "handler".
+
+	Incomming
+	connections
+	    ->              -> New handler (TCP conn)
+	    ->       Server -> New handler (TCP conn)
+	    ->              -> New handler (TCP conn)
+
+The Goroutine then connect to a server based on the clients ip, it then spawns **2** more Goroutines to pass data recieved from the client going to the server, and the response from the server going to the client.
+
+             -> passData from:client to:server
+	Handler |
+	         -> passData from:server to:client
+
+One incomming connection requires **3** Goroutines and 2 file descriptors (FD).
+
+The buffer size for each "passData" is set at 2048 bytes.
+
 ## Usage
 Godist requires a configuration file to setup the most basic settings. The software will look for **godist.conf** by default. You can specify your own configuration file by passing it as an argument.
 
