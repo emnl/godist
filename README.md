@@ -1,6 +1,10 @@
 # Godist
 **– _Transmission control protocol (TCP) distribution_**
 
+	|      | --TCP--> |      | --TCP--> |       |
+	|Client|          |Godist|          |Service|
+	|      | <--TCP-- |      | <--TCP-- |       |
+
 Godist distributes your incoming tcp connections between servers, balancing the load. A thin high-performance layer between your servers and the world.
 
 Written in Go. Built for concurrency.
